@@ -1,0 +1,215 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Todo
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: todo-item
+    description: todo item
+paths:
+  /:
+    get:
+      operationId: healthCheck
+      responses:
+        200:
+          description: success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        default:
+          $ref: '#/components/responses/500'
+  /todo-item:
+    get:
+      operationId: todoItemList
+      tags:
+        - todo-item
+      parameters:
+        - $ref: '#/components/parameters/listPaginationLimit'
+        - $ref: '#/components/parameters/listPaginationSkip'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/todoItemFindResponse'
+        default:
+          $ref: '#/components/responses/500'
+    post:
+      operationId: todoItemCreate
+      tags:
+        - todo-item
+      requestBody:
+        description: create todo item request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/todoItem'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/todoItemWithId'
+        default:
+          $ref: '#/components/responses/500'
+  /todo-item/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: todo item id
+        schema:
+          type: integer
+    get:
+      operationId: todoItemGetById
+      tags:
+        - todo-item
+      responses:
+        200:
+          description: success delete by id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/todoItemWithId'
+        404:
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/500'
+    put:
+      operationId: todoItemUpdateById
+      tags:
+        - todo-item
+      requestBody:
+        description: update todo item request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/todoItem'
+      responses:
+        200:
+          description: success delete by id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/todoItemWithId'
+        404:
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/500'
+    delete:
+      operationId: todoItemDeleteById
+      tags:
+        - todo-item
+      responses:
+        200:
+          description: success delete by id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/todoItemWithId'
+        404:
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/500'
+
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        detail: {}
+    HealthStatus:
+      type: object
+      required:
+        - healthy
+      properties:
+        healthy:
+          type: boolean
+    listMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 100
+        skip:
+          type: integer
+          example: 20
+        limit:
+          type: integer
+          example: 10
+    todoItem:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+      required:
+        - title
+    todoItemWithId:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+          required:
+            - id
+        - $ref: '#/components/schemas/todoItem'
+    todoItemFindResponse:
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/todoItemWithId'
+        meta:
+          $ref: '#/components/schemas/listMeta'
+  responses:
+    400:
+      description: bad request error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    404:
+      description: not found error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    500:
+      description: internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    listPaginationLimit:
+      name: limit
+      in: query
+      description: perpage limit
+      schema:
+        type: integer
+        default: 10
+    listPaginationSkip:
+      name: skip
+      in: query
+      description: perpage skip parameter
+      schema:
+        type: integer
+        default: 10

@@ -1,0 +1,8 @@
+package: api_server
+generate:
+  echo-server: true
+  embedded-spec: true
+additional-imports:
+  - package: todo-codegen/internal/dto
+    alias: .
+output: internal/api_server/api_server.gen.go
